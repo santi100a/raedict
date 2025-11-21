@@ -1,0 +1,13 @@
+{
+  "name": "raedict",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "tsc -w"
+  }
+}
