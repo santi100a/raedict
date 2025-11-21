@@ -5,9 +5,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.10.1",
+    "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "prettify": "prettier src/**/*.ts --write",
+    "build": "tsc",
+    "start": "node ."
   }
 }
