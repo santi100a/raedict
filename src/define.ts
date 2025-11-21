@@ -17,7 +17,7 @@ export default async function command(socket: Socket, tokens: string[]) {
       socket.write("501 No has especificado la palabra a definir\r\n");
       return;
     }
-    if (dictionary !== "dle") {
+    if (!["dle", "*", "!"].includes(dictionary)) {
       socket.write('550 Solamente tenemos un diccionario: "dle"\r\n');
       return;
     }

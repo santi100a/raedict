@@ -8,7 +8,7 @@ export default async function command(socket: Socket, tokens: string[]) {
     return;
   }
 
-  if (dictionary.toLowerCase() !== "dle") {
+  if (!["dle", "*", "!"].includes(dictionary.toLowerCase())) {
     socket.write('550 Solamente tenemos un diccionario: "dle"\r\n');
     return;
   }
@@ -36,6 +36,7 @@ export default async function command(socket: Socket, tokens: string[]) {
     }
     data = await res.json();
   } catch (err) {
+    console.error("[Module MATCH] Error de conexión con la API:", err);
     socket.write(`554 Error de conexión con la API\r\n`);
     return;
   }
