@@ -14,7 +14,7 @@ const DICT_PORT = 2628;
 const clientNames = new Map<net.Socket, string>();
 const server = net.createServer((socket) => {
 	socket.write(
-		`220 RAE DICT en ${process.platform} a tu servicio - Funciona con <https://rae-api.com>\r\n`,
+		`220 RAE DICT en ${process.platform}, Node.js ${process.version} <https://github.com/santi100a/raedict> a tu servicio - Funciona con <https://rae-api.com>\r\n`,
 	);
 
 	let buffer = ''; // per-connection buffer

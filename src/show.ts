@@ -12,8 +12,9 @@ export default function command(socket: Socket, tokens: string[]) {
 	// SHOW SERVER
 	if (key === 'SERVER') {
 		socket.write('114 Info. del servidor\r\n');
-		socket.write(`RAE DICT en ${process.platform}\r\n`);
-		socket.write(`(C) 2025 Santiago Rojas <https://github.com/santi100a>`);
+		socket.write(`RAE DICT en ${process.platform}, Node.js ${process.version} <https://github.com/santi100a/raedict>\r\n`);
+		socket.write(`(C) 2025 Santiago Rojas <https://github.com/santi100a>\r\n`);
+		socket.write(`Funciona gracias a RAE API <https://rae-api.com>\r\n`);
 		socket.write('.\r\n');
 		socket.write('250 OK\r\n');
 		return;
