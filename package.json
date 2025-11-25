@@ -4,14 +4,19 @@
   "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
+    "@babel/preset-typescript": "^7.28.5",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
     "prettier": "^3.6.2",
+    "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"
   },
   "scripts": {
     "dev": "tsc -w",
     "prettify": "prettier src/**/*.ts --write",
     "build": "tsc",
+    "test": "jest --coverage --detectOpenHandles",
     "start": "node ."
   }
 }

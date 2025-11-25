@@ -1,10 +1,20 @@
 import type { Socket } from 'node:net';
 
-export default function command(socket: Socket, tokens: string[]) {
-	const [_, optionName] = tokens;
-	if (['MIME', 'UTF8'].includes(optionName?.toUpperCase() ?? '')) {
-		socket.write('250 text/plain; charset=utf-8\r\n');
+export default function command(
+	socket: Socket,
+	tokens: string[],
+	optionRef: { mime: boolean },
+) {
+	const [, optionNameRaw] = tokens;
+	const optionName = optionNameRaw?.toUpperCase() ?? '';
+
+	if (optionName === 'MIME') {
+		optionRef.mime = true;
+		socket.write('250 OK\r\n');
+	} else if (optionName === 'UTF8') {
+		// Optional extension: you can accept or reject it
+		socket.write('250 OK\r\n');
 	} else {
-		socket.write('501 No se admite el comando "OPTION"\r\n');
+		socket.write('501 Opción no reconocida o no implementada\r\n');
 	}
 }

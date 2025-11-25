@@ -1,5 +1,5 @@
 import { processCategory, processVerbCategory } from './libwordcategories';
-export function formatCategoryString(sense: any) {
+export default function formatCategoryString(sense: any) {
 	const category = processCategory(sense.category);
 	const verbCategory =
 		sense.category === 'verb' ? processVerbCategory(sense.verbCategory) : '';

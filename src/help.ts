@@ -16,6 +16,7 @@ const COMMANDS = [
 	],
 	['SHOW INFO dle', 'Mostrar información del diccionario de la RAE'],
 	['SHOW SERVER', 'Mostrar información del servidor'],
+	['OPTION MIME', 'Solicitar encabezados MIME en las respuestas'],
 	['CLIENT [nombre]', 'Identificarse con el servidor'],
 	['STATUS', 'Verificar el estado del servicio'],
 	['HELP', 'Mostrar esta lista de comandos'],
@@ -28,7 +29,7 @@ export default function command(socket: Socket) {
 	for (const [cmd, desc] of COMMANDS) {
 		socket.write(`${cmd} : ${desc}\r\n`);
 	}
-	socket.write('NO se admite "AUTH" y "OPTION" no hace nada\r\n');
+	socket.write('NO se admite "AUTH"\r\n');
 	socket.write('.\r\n');
 	socket.write('250 OK\r\n');
 }

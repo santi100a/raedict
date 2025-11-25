@@ -40,7 +40,7 @@ export default async function command(socket: Socket, tokens: string[]) {
 		}
 		data = await res.json();
 	} catch (err) {
-		console.error('[Module MATCH] Error de conexión con la API:', err);
+		console.error('[ERROR] [Module MATCH] API connection error:', err);
 		socket.write(`554 Error de conexión con la API\r\n`);
 		return;
 	}

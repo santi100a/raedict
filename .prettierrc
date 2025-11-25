@@ -2,5 +2,6 @@
     "semi": true,
     "bracketSameLine": true,
     "singleQuote": true,
-    "useTabs": true
+    "useTabs": true,
+    "arrowParens": "avoid"
 }

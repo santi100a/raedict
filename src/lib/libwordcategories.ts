@@ -3,47 +3,31 @@
 // ──────────────────────────────────────────────────────────────
 
 export function processCategory(category: string): string {
-	switch (category) {
-		case 'adjective':
-			return 'adj.';
-		case 'adverb':
-			return 'adv.';
-		case 'noun':
-			return 'sust.';
-		case 'verb':
-			return 'v.';
-		case 'pronoun':
-			return 'pron.';
-		case 'preposition':
-			return 'prep.';
-		case 'conjunction':
-			return 'conj.';
-		case 'interjection':
-			return 'interj.';
-		case 'determiner':
-			return 'det.';
-		case 'article':
-			return 'art.';
-		case 'numeral':
-			return 'num.';
-		case 'prefix':
-			return 'pref.';
-		case 'suffix':
-			return 'suf.';
-		default:
-			return category || '';
-	}
+	const categoryMap = new Map<string, string>([
+		['adjective', 'adj.'],
+		['adverb', 'adv.'],
+		['noun', 'sust.'],
+		['verb', 'v.'],
+		['pronoun', 'pron.'],
+		['preposition', 'prep.'],
+		['conjunction', 'conj.'],
+		['interjection', 'interj.'],
+		['determiner', 'det.'],
+		['article', 'art.'],
+		['numeral', 'num.'],
+		['prefix', 'pref.'],
+		['suffix', 'suf.'],
+	]);
+
+	return categoryMap.get(category) ?? category ?? '';
 }
 
 export function processVerbCategory(verbCategory: string): string {
-	switch (verbCategory) {
-		case 'transitive':
-			return 'tr.';
-		case 'intransitive':
-			return 'intr.';
-		case 'pronominal':
-			return 'prnl.';
-		default:
-			return '';
-	}
+	const verbCategoryMap = new Map<string, string>([
+		['transitive', 'tr.'],
+		['intransitive', 'intr.'],
+		['pronominal', 'prnl.'],
+	]);
+
+	return verbCategoryMap.get(verbCategory) ?? '';
 }

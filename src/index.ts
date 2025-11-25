@@ -1,7 +1,9 @@
 import * as net from 'node:net';
+
+import tokenize from './lib/libtokenize';
+
 import quit from './quit';
 import help from './help';
-import tokenize from './lib/libtokenize';
 import client from './client';
 import show from './show';
 import define from './define';
@@ -10,12 +12,17 @@ import status from './status';
 import option from './option';
 import auth from './auth';
 
-const DICT_PORT = 2628;
+const DICT_PORT = process.env.PORT ?? 2628;
 const clientNames = new Map<net.Socket, string>();
+const optionRef = { mime: false };
 const server = net.createServer((socket) => {
 	socket.write(
 		`220 RAE DICT en ${process.platform}, Node.js ${process.version} <https://github.com/santi100a/raedict> a tu servicio - Funciona con <https://rae-api.com>\r\n`,
 	);
+
+	socket.on('connect', () => {
+		console.info('[INFO] Connection established.');
+	});
 
 	let buffer = ''; // per-connection buffer
 
@@ -23,7 +30,7 @@ const server = net.createServer((socket) => {
 		buffer += chunk.toString('utf8');
 
 		// Process each full line
-		let index;
+		let index: number;
 		while ((index = buffer.indexOf('\r\n')) !== -1) {
 			const line = buffer.slice(0, index);
 			buffer = buffer.slice(index + 2); // remove processed line
@@ -32,15 +39,20 @@ const server = net.createServer((socket) => {
 		}
 	});
 
+	socket.on('error', () => {
+		console.warn('[WARN] Connection dropped.');
+	});
+
 	socket.on('end', () => {
 		// connection closed
 		clientNames.delete(socket);
+		console.info('[INFO] Connection closed.');
 	});
 });
 
 // Example command handler
 async function handleCommand(line: string, socket: net.Socket) {
-	console.log('Received command:', line);
+	console.info('[INFO] Received command:', line);
 	if (!line.trim()) {
 		socket.write('500 Línea vacía\r\n');
 		return;
@@ -66,7 +78,7 @@ async function handleCommand(line: string, socket: net.Socket) {
 
 		case 'DEFINE':
 			tokens = tokenize(line);
-			await define(socket, tokens);
+			await define(socket, tokens, optionRef);
 			return;
 
 		case 'MATCH':
@@ -78,16 +90,16 @@ async function handleCommand(line: string, socket: net.Socket) {
 			return;
 		case 'OPTION':
 			tokens = tokenize(line);
-			option(socket, tokens);
+			option(socket, tokens, optionRef);
 			return;
 		case 'AUTH':
 			auth(socket);
 			return;
 	}
 
-	socket.write('500 Comando no implementado\r\n');
+	socket.write('501 Comando desconocido\r\n');
 }
 
 server.listen(DICT_PORT, () => {
-	console.log(`Listo en: dict://127.0.0.1:${DICT_PORT}`);
+	console.log(`[SUCCESS] Listening on: dict://127.0.0.1:${DICT_PORT}`);
 });

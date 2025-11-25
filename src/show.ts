@@ -47,7 +47,7 @@ export default function command(socket: Socket, tokens: string[]) {
 	}
 
 	// SHOW DB
-	if (key === 'DB' || key === 'DATABASES') {
+	if (['DB', 'DATABASES'].includes(key)) {
 		socket.write('110 1 diccionario presente\r\n');
 		socket.write('dle "Diccionario de la Lengua Española"\r\n');
 		socket.write('.\r\n');
@@ -56,7 +56,7 @@ export default function command(socket: Socket, tokens: string[]) {
 	}
 
 	// SHOW STRAT
-	if (key === 'STRAT' || key === 'STRATEGIES') {
+	if (['STRAT', 'STRATEGIES'].includes(key)) {
 		socket.write(
 			'111 2 estrategias presentes ("exact" -> . = ! * | "fuzzy" -> ~)\r\n',
 		);

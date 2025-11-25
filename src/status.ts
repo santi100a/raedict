@@ -22,7 +22,7 @@ export default async function command(socket: Socket) {
 		);
 		return;
 	} catch (err) {
-		console.error('[Module STATUS] Upstream error:', err);
+		console.error('[ERROR] [Module STATUS] Upstream error:', err);
 		socket.write('420 Servicio no disponible\r\n');
 		return;
 	}
