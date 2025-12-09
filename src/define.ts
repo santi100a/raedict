@@ -73,11 +73,7 @@ export default async function command(
 			} para "${headword}"\r\n`,
 		);
 
-		if (optionRef.mime) {
-			socket.write('Content-Type: text/plain; charset=utf-8\r\n');
-			socket.write('Content-Transfer-Encoding: 8bit\r\n');
-			socket.write('\r\n');
-		}
+		// if optionRef.mime, would've written headers
 
 		// -------------------------------------
 		// NEW: show conjugation table only once
