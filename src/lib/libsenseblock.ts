@@ -14,18 +14,12 @@ export default function writeSenseBlock(
 	conjugations: any,
 	showConjTable: boolean,
 ) {
-	socket.write(`151 "${headword}" dle "Diccionario de la Lengua Española"\r\n`);
-	socket.write('\r\n');
-
-	if (origin?.raw) socket.write(`Origen: ${origin.raw}\r\n`);
-
 	const categoryString = formatCategoryString(sense);
 
 	socket.write(
-		`${sense.meaning_number}. ${categoryString} ${sense.description}\r\n`,
+		`${sense.meaning_number}. ${categoryString} ${sense.usage} ${sense.description}\r\n`,
 	);
 
-	if (sense.usage) socket.write(`\tUso: ${sense.usage}\r\n`);
 	if (sense.synonyms?.length)
 		socket.write(`\tSinónimos: ${sense.synonyms.join(', ')}\r\n`);
 	if (sense.antonyms?.length)
@@ -33,6 +27,4 @@ export default function writeSenseBlock(
 
 	// NEW: only on first 151 block
 	if (showConjTable) writeConjugationTable(socket, conjugations);
-
-	socket.write('.\r\n');
 }

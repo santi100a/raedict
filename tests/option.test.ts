@@ -4,7 +4,7 @@ import optionCommand from '../src/option';
 describe('OPTION command', () => {
   let socket: Socket;
   let writes: string[];
-  let optionRef: { mime: boolean };
+  let optionRef: { conjugations: boolean };
 
   beforeEach(() => {
     writes = [];
@@ -12,34 +12,27 @@ describe('OPTION command', () => {
       write: (data: string) => writes.push(data),
     } as unknown as Socket;
 
-    optionRef = { mime: false };
+    optionRef = { conjugations: false };
   });
 
-  it('enables MIME option', () => {
-    optionCommand(socket, ['OPTION', 'MIME'], optionRef);
-
-    expect(optionRef.mime).toBe(true);
+  it('enables conjugation option', () => {
+    optionCommand(socket, ['OPTION', 'CONJ'], optionRef);
+    expect(optionRef.conjugations).toBe(true);
     expect(writes[0]).toBe('250 OK\r\n');
   });
 
-  it('accepts UTF8 option without changing state', () => {
-    optionCommand(socket, ['OPTION', 'UTF8'], optionRef);
-
-    expect(optionRef.mime).toBe(false); // MIME unchanged
-    expect(writes[0]).toBe('250 OK\r\n');
-  });
 
   it('rejects unknown options', () => {
     optionCommand(socket, ['OPTION', 'FOO'], optionRef);
 
-    expect(optionRef.mime).toBe(false);
+    expect(optionRef.conjugations).toBe(false);
     expect(writes[0]).toBe('501 Opción no reconocida o no implementada\r\n');
   });
 
   it('handles missing option argument gracefully', () => {
     optionCommand(socket, ['OPTION'], optionRef);
 
-    expect(optionRef.mime).toBe(false);
+    expect(optionRef.conjugations).toBe(false);
     expect(writes[0]).toBe('501 Opción no reconocida o no implementada\r\n');
   });
 });

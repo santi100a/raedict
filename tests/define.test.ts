@@ -41,7 +41,7 @@ describe('DEFINE command', () => {
       json: async () => mockResult,
     });
 
-    await defineCommand(socket, ['DEFINE', 'dle', 'probar'], { mime: false });
+    await defineCommand(socket, ['DEFINE', 'dle', 'probar'], { conjugations: false });
 
     // Check the socket writes
     expect(writes[0]).toMatch(/^150/); // heading
@@ -64,7 +64,7 @@ describe('DEFINE command', () => {
       }),
     });
 
-    await defineCommand(socket, ['DEFINE', 'dle', 'nonexistent'], { mime: false });
+    await defineCommand(socket, ['DEFINE', 'dle', 'nonexistent'], { conjugations: false });
 
     expect(writes[0]).toContain(
       '552 No hay coincidencia para la palabra "nonexistent"',
@@ -74,7 +74,7 @@ describe('DEFINE command', () => {
   it('handles network errors', async () => {
     (fetch as jest.Mock).mockRejectedValue(new Error('fail'));
 
-    await defineCommand(socket, ['DEFINE', 'dle', 'error'], { mime: false });
+    await defineCommand(socket, ['DEFINE', 'dle', 'error'], { conjugations: false });
 
     expect(writes[0]).toBe('554 Error interno al obtener las definiciones\r\n');
   });

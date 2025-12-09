@@ -1,10 +1,12 @@
 import type { Socket } from 'node:net';
 import writeSenseBlock from './lib/libsenseblock';
+import writeConjugationTable from './lib/libconjugationtable';
+import countDefinitions from './lib/libcountdefinitions';
 
 export default async function command(
 	socket: Socket,
 	tokens: string[],
-	optionRef: { mime: boolean },
+	optionRef: { conjugations: boolean },
 ) {
 	try {
 		let dictionary = tokens[1];
@@ -63,9 +65,8 @@ export default async function command(
 		// -------------------------------
 		const meanings = result.data.meanings;
 		const headword = result.data.word ?? queryWord;
-		const { origin, senses, conjugations } = meanings[0];
 
-		const defCount = senses.length;
+		const defCount = countDefinitions(meanings);
 
 		socket.write(
 			`150 ${defCount} ${
@@ -73,26 +74,29 @@ export default async function command(
 			} para "${headword}"\r\n`,
 		);
 
-		// if optionRef.mime, would've written headers
-
 		// -------------------------------------
 		// NEW: show conjugation table only once
 		// -------------------------------------
-		let hasShownConjugations = false;
 
-		for (const sense of senses) {
-			writeSenseBlock(
-				socket,
-				headword,
-				origin,
-				sense,
-				conjugations,
-				!hasShownConjugations,
+		for (const { origin, senses, conjugations } of meanings) {
+			socket.write(
+				`151 "${headword}" dle "Diccionario de la Lengua Española"\r\n`,
 			);
-
-			hasShownConjugations = true;
+			socket.write('\r\n');
+			if (origin?.raw) socket.write(`Origen: ${origin.raw}\r\n`);
+			if (optionRef.conjugations) writeConjugationTable(socket, conjugations);
+			for (const sense of senses) {
+				writeSenseBlock(
+					socket,
+					headword,
+					origin,
+					sense,
+					conjugations,
+					optionRef.conjugations,
+				);
+			}
 		}
-
+		socket.write('\r\n.\r\n');
 		socket.write('250 OK\r\n');
 	} catch (err) {
 		console.error('Error running DEFINE command:', err);
