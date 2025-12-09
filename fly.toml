@@ -1,0 +1,29 @@
+# fly.toml app configuration file generated for raedict on 2025-12-08T18:49:22-05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'raedict'
+primary_region = 'iad'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  PORT = "2628"
+
+
+[[services]]
+  internal_port = 2628
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 2628
+
+  # optional but recommended if using long-lived connections
+  [services.tcp_checks]
+    interval = "15s"
+    timeout  = "2s"
+

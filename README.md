@@ -8,7 +8,7 @@ Este es un servidor escrito para Node.js que provee una interfaz TCP y emplea el
 Muchas gracias a los creadores de <https://rae-api.com/> por hacer esto posible.
 Estoy buscando una VPS que me permita alojar este servidor (es decir, TCP en bruto) y
 especificar el puerto, preferiblemente sin tarjeta de crédito.
-Por ahora está en ClawCloud, y por eso está funcionando en <dict://raedict.zapto.org:48295>: utilicé No-IP para el dominio, pero ClawCloud sólo me da el puerto 48295.
+Por ahora está en Fly.io. Hay dos dominios: <dict://raedict.fly.dev/> y <dict://raedict.zapto.org/>. Si uno no funciona, intenta con el otro.
 
 ## Características
 
