@@ -4,7 +4,7 @@
 #
 
 app = 'raedict'
-primary_region = 'iad'
+primary_region = 'gru'
 
 [[vm]]
   memory = '1gb'
@@ -22,8 +22,8 @@ primary_region = 'iad'
   [[services.ports]]
     port = 2628
 
-  # optional but recommended if using long-lived connections
-  [services.tcp_checks]
-    interval = "15s"
-    timeout  = "2s"
+# optional but recommended if using long-lived connections
+# [services.tcp_checks]
+#   interval = "15s"
+#   timeout  = "2s"
 
