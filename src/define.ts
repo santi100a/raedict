@@ -95,8 +95,9 @@ export default async function command(
 					optionRef.conjugations,
 				);
 			}
-		}
 		socket.write('\r\n.\r\n');
+		}
+
 		socket.write('250 OK\r\n');
 	} catch (err) {
 		console.error('Error running DEFINE command:', err);

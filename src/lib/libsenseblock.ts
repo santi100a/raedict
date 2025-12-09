@@ -1,6 +1,7 @@
 import type { Socket } from 'node:net';
 import formatCategoryString from './libformat';
 import writeConjugationTable from './libconjugationtable';
+import processUsage from './libusage';
 
 /* -------------------------------------------------------------------------- */
 /*                              Sense block writer                             */
@@ -17,7 +18,7 @@ export default function writeSenseBlock(
 	const categoryString = formatCategoryString(sense);
 
 	socket.write(
-		`${sense.meaning_number}. ${categoryString} ${sense.usage} ${sense.description}\r\n`,
+		`${sense.meaning_number}. ${categoryString} ${processUsage(sense.usage)} ${sense.description}\r\n`,
 	);
 
 	if (sense.synonyms?.length)
