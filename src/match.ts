@@ -20,16 +20,16 @@ export default async function command(socket: Socket, tokens: string[]) {
 
 	let engine: string;
 
-	if (strat === 'exact') engine = 'linear';
-	else if (strat === 'fuzzy') engine = 'hits';
+	if (['exact', 'prefix'].includes(strat)) engine = 'linear';
+	else if (['fuzzy'].includes(strat)) engine = 'hits';
 	else {
-		socket.write('551 Estrategia desconocida. Usa: exact, fuzzy\r\n');
+		socket.write('551 Estrategia desconocida. Usa: exact, prefix, fuzzy\r\n');
 		return;
 	}
 
 	const url = `https://rae-api.com/api/search?q=${encodeURIComponent(query)}&engine=${engine}`;
 
-	let data;
+	let data: ErrorResponse & SearchResponse;
 	try {
 		const res = await fetch(url);
 		if (!res.ok) {

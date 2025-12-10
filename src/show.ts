@@ -12,7 +12,9 @@ export default function command(socket: Socket, tokens: string[]) {
 	// SHOW SERVER
 	if (key === 'SERVER') {
 		socket.write('114 Info. del servidor\r\n');
-		socket.write(`RAE DICT en ${process.platform}, Node.js ${process.version} <https://github.com/santi100a/raedict>\r\n`);
+		socket.write(
+			`RAE DICT en ${process.platform}, Node.js ${process.version} <https://github.com/santi100a/raedict>\r\n`,
+		);
 		socket.write(`(C) 2025 Santiago Rojas <https://github.com/santi100a>\r\n`);
 		socket.write(`Funciona gracias a RAE API <https://rae-api.com>\r\n`);
 		socket.write('.\r\n');
@@ -40,7 +42,8 @@ export default function command(socket: Socket, tokens: string[]) {
 		socket.write(
 			'Diccionario de la Lengua Española, RAE, API no oficial <https://rae-api.com>\r\n',
 		);
-		socket.write('Autor: RAE (Real Academia Española)\r\n');
+		socket.write('Fuente: API no oficial <https://rae-api.com>\r\n');
+		socket.write('Derechos de autor: (C) Real Academia Española\r\n');
 		socket.write('.\r\n');
 		socket.write('250 OK\r\n');
 		return; // <-- important
@@ -58,9 +61,10 @@ export default function command(socket: Socket, tokens: string[]) {
 	// SHOW STRAT
 	if (['STRAT', 'STRATEGIES'].includes(key)) {
 		socket.write(
-			'111 2 estrategias presentes ("exact" -> . = ! * | "fuzzy" -> ~)\r\n',
+			'111 3 estrategias presentes ("exact" -> . = ! * | "fuzzy" -> ~)\r\n',
 		);
 		socket.write('exact "Buscar la palabra exacta"\r\n');
+		socket.write('prefix "Buscar la palabra con el principio"\r\n');
 		socket.write('fuzzy "Buscar palabras con margen de error"\r\n');
 		socket.write('.\r\n');
 		socket.write('250 OK\r\n');

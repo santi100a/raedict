@@ -13,7 +13,7 @@ export default async function command(socket: Socket) {
 		const endTime = performance.now();
 		const responseTime = endTime - startTime;
 
-		const { data } = await req.json();
+		const { data } = (await req.json()) as WordOnlyResponse;
 
 		const wotd = data.word ?? '(desconocida)';
 

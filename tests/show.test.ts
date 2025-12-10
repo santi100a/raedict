@@ -24,7 +24,6 @@ describe('SHOW command', () => {
 
     expect(socket.write).toHaveBeenCalledWith('112 Info. del diccionario "dle"\r\n');
     expect(socket.write).toHaveBeenCalledWith(expect.stringContaining('Diccionario de la Lengua Española'));
-    expect(socket.write).toHaveBeenCalledWith('Autor: RAE (Real Academia Española)\r\n');
     expect(socket.write).toHaveBeenCalledWith('.\r\n');
     expect(socket.write).toHaveBeenCalledWith('250 OK\r\n');
   });
@@ -58,9 +57,10 @@ describe('SHOW command', () => {
     showCommand(socket, ['SHOW', 'STRAT']);
 
     expect(socket.write).toHaveBeenCalledWith(
-      '111 2 estrategias presentes ("exact" -> . = ! * | "fuzzy" -> ~)\r\n',
+      '111 3 estrategias presentes ("exact" -> . = ! * | "fuzzy" -> ~)\r\n',
     );
     expect(socket.write).toHaveBeenCalledWith('exact "Buscar la palabra exacta"\r\n');
+    expect(socket.write).toHaveBeenCalledWith('prefix "Buscar la palabra con el principio"\r\n');
     expect(socket.write).toHaveBeenCalledWith('fuzzy "Buscar palabras con margen de error"\r\n');
     expect(socket.write).toHaveBeenCalledWith('.\r\n');
     expect(socket.write).toHaveBeenCalledWith('250 OK\r\n');

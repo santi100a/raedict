@@ -41,7 +41,7 @@ describe('MATCH command', () => {
 	it('returns 551 for unknown strategies', async () => {
 		await match(socket, ['MATCH', 'dle', 'weird', 'hola']);
 		expect(writes).toEqual([
-			'551 Estrategia desconocida. Usa: exact, fuzzy\r\n',
+			'551 Estrategia desconocida. Usa: exact, prefix, fuzzy\r\n',
 		]);
 	});
 

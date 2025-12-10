@@ -67,7 +67,7 @@ describe('DEFINE command', () => {
     await defineCommand(socket, ['DEFINE', 'dle', 'nonexistent'], { conjugations: false });
 
     expect(writes[0]).toContain(
-      '552 No hay coincidencia para la palabra "nonexistent"',
+      '552 No hay coincidencia para "nonexistent"',
     );
   });
 

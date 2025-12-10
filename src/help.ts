@@ -16,15 +16,20 @@ const COMMANDS = [
 	],
 	['SHOW INFO dle', 'Mostrar información del diccionario de la RAE'],
 	['SHOW SERVER', 'Mostrar información del servidor'],
-	['OPTION MIME', 'Solicitar encabezados MIME en las respuestas'],
+	['OPTION MIME', 'No hace nada (comando para compatibilidad)'],
+	['OPTION UTF8', 'No hace nada (comando para compatibilidad)'],
+	[
+		'(NO OFICIAL) OPTION CONJ <ON/OFF>',
+		'Habilitar o deshabilitar tablas de conjugación (no estándar, no funciona en otros servidores)',
+	],
 	['CLIENT [nombre]', 'Identificarse con el servidor'],
 	['STATUS', 'Verificar el estado del servicio'],
-	['HELP', 'Mostrar esta lista de comandos'],
+	['HELP', 'Mostrar esta guía de comandos'],
 	['QUIT', 'Desconectarse del servidor'],
 ];
-export default function command(socket: Socket) {
+export default function command(socket: Socket): void {
 	socket.write(
-		'113 Lista de comandos (<> = arg. obligatorio, [] = arg. optativo) \r\n',
+		'113 Guía de comandos (<> = arg. obligatorio, [] = arg. optativo) \r\n',
 	);
 	for (const [cmd, desc] of COMMANDS) {
 		socket.write(`${cmd} : ${desc}\r\n`);
