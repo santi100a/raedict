@@ -675,6 +675,18 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.2.9.tgz#d229a7b7f9dac167a156992ef23c7f023653f53b"
   integrity sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==
 
+"@santi100a/assertion-lib@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@santi100a/assertion-lib/-/assertion-lib-2.0.4.tgz#a5f06f89df674d180248c4a1d85fc136f2b626e3"
+  integrity sha512-CchVLAw00jNEShFWHA0C6dJNOVpojIR9zgpv4YDlsR1M9jCGom3Ss52Oh4sxdNc1K+nvcADU6rQWOQbT0OIf3w==
+
+"@santi100a/dict-server@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@santi100a/dict-server/-/dict-server-1.0.0.tgz#5b5621edb817ac1d442a7c522a7ce1ff7afa9192"
+  integrity sha512-jNoa5msBe12LR0of/HePFkWPXhgJPKEw/ix85E5wd91kbD+XP1F8TXVNmq4/59mHvTbxYlYYT+FUOHqaiwUMOw==
+  dependencies:
+    "@santi100a/assertion-lib" "^2.0.4"
+
 "@sinclair/typebox@^0.34.0":
   version "0.34.41"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.34.41.tgz#aa51a6c1946df2c5a11494a2cdb9318e026db16c"

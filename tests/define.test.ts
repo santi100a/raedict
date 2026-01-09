@@ -1,81 +1,81 @@
-import type { Socket } from 'node:net';
-import defineCommand from '../src/define';
+import type { DictCommand } from '@santi100a/dict-server/dist/lib/libtypes';
+import type { DictResponse } from '@santi100a/dict-server/dist/response.class';
+import { defineHandler } from '../src/define.handler';
+import formatCategoryString from '../src/lib/libformat';
+import processUsage from '../src/lib/libusage';
+import writeConjugationTable from '../src/lib/libconjugationtable';
+
+jest.mock('../src/lib/libformat');
+jest.mock('../src/lib/libusage');
+jest.mock('../src/lib/libconjugationtable');
 
 globalThis.fetch = jest.fn();
 
-describe('DEFINE command', () => {
-  let socket: Socket;
-  let writes: string[];
+describe('defineHandler', () => {
+  let mockResponse: DictResponse;
 
   beforeEach(() => {
-    writes = [];
-    socket = {
-      write: (data: string) => writes.push(data),
-    } as unknown as Socket;
+    mockResponse = {
+      remoteAddress: '127.0.0.1',
+      optionMimeEnabled: false,
+      status: jest.fn(),
+      error: jest.fn(),
+      writeDefinitions: jest.fn(),
+      writeMatches: jest.fn(),
+      close: jest.fn(),
+      clientText: '',
+    } as unknown as DictResponse;
 
-    (fetch as jest.Mock).mockClear();
+    (formatCategoryString as jest.Mock).mockImplementation((sense) => `[${sense.pos}]`);
+    (processUsage as jest.Mock).mockImplementation((usage) => (usage ? `(uso: ${usage})` : ''));
+    (writeConjugationTable as jest.Mock).mockImplementation(() => 'CONJ_TABLE');
   });
 
-  it('returns multiple senses and includes conjugation table', async () => {
-    const mockResult = {
-      data: {
-        word: 'probar',
-        meanings: [
-          {
-            origin: { raw: 'Del latín probare' },
-            senses: [
-              { meaning_number: 1, description: 'Def 1', category: 'verb' },
-              { meaning_number: 2, description: 'Def 2', category: 'verb' },
-            ],
-            conjugations: {
-              non_personal: { infinitive: 'probar' },
-              indicative: { present: { singular_first_person: 'pruebo' } },
-            },
-          },
-        ],
-      },
-    };
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    (fetch as jest.Mock).mockResolvedValue({
+  const makeCommand = (name: string, parameters: string[]): DictCommand => {
+    return {
+      raw: parameters.join(' '),
+      name: parameters[0] ?? '',
+      parameters,
+      syntaxValid: true,
+    } as unknown as DictCommand;
+  };
+
+  it('returns 501 if parameters are missing', async () => {
+    await defineHandler(makeCommand('DEFINE', []), mockResponse);
+    expect(mockResponse.status).toHaveBeenCalledWith(501);
+  });
+
+  it('returns 550 for invalid dictionary', async () => {
+    await defineHandler(makeCommand('DEFINE', ['invalid', 'word']), mockResponse);
+    expect(mockResponse.status).toHaveBeenCalledWith(550);
+  });
+
+  it('calls writeDefinitions when API returns data', async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      json: async () => mockResult,
-    });
-
-    await defineCommand(socket, ['DEFINE', 'dle', 'probar'], { conjugations: false });
-
-    // Check the socket writes
-    expect(writes[0]).toMatch(/^150/); // heading
-    expect(writes.some(w => w.includes('Def 1'))).toBe(true);
-    expect(writes.some(w => w.includes('Def 2'))).toBe(true);
-    expect(writes.some(w => w.includes('pruebo') || w.includes('probar'))).toBe(true); // conjugation
-
-    // Final OK
-    expect(writes[writes.length - 1]).toBe('250 OK\r\n');
-  });
-
-  it('handles API returning 404', async () => {
-    (fetch as jest.Mock).mockResolvedValue({
-      status: 404,
-      ok: false,
+      status: 200,
       json: async () => ({
-        error: 'NOT_FOUND',
-        ok: false,
-        suggestions: ['sugerencia1', 'sugerencia2'],
+        data: {
+          word: 'test',
+          meanings: [
+            {
+              senses: [{ meaning_number: 1, pos: 'n', usage: 'formal', description: 'A test' }],
+              conjugations: null,
+            },
+          ],
+        },
       }),
     });
 
-    await defineCommand(socket, ['DEFINE', 'dle', 'nonexistent'], { conjugations: false });
+    await defineHandler(makeCommand('DEFINE', ['dle', 'test']), mockResponse);
 
-    expect(writes[0]).toContain(
-      '552 No hay coincidencia para "nonexistent"',
-    );
-  });
-
-  it('handles network errors', async () => {
-    (fetch as jest.Mock).mockRejectedValue(new Error('fail'));
-
-    await defineCommand(socket, ['DEFINE', 'dle', 'error'], { conjugations: false });
-
-    expect(writes[0]).toBe('554 Error interno al obtener las definiciones\r\n');
+    expect(mockResponse.writeDefinitions).toHaveBeenCalled();
+    const defs = (mockResponse.writeDefinitions as jest.Mock).mock.calls[0][0];
+    expect(defs[0].headword).toBe('test');
+    expect(defs[0].definition).toContain('1. [n] (uso: formal) A test');
   });
 });

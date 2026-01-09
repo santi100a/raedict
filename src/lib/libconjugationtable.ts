@@ -1,21 +1,21 @@
 /* -------------------------------------------------------------------------- */
 /*                         Conjugation table formatter                         */
 /* -------------------------------------------------------------------------- */
-import type { Socket } from 'node:net';
 import { processConjugation } from './libconjugations';
 
-export default function writeConjugationTable(socket: Socket, conj: any) {
+export default function writeConjugationTable(conj: any) {
+	let string = '';
+
 	if (!conj) return;
 
-	socket.write('Conjugaciones (tabla resumida):\r\n');
+	string += 'Conjugaciones (tabla resumida):\r\n';
 
 	const line =
 		'+------------------------+------------------------------------------+\r\n';
-	socket.write(line);
-	socket.write(
-		'| Tiempo                 | Formas                                   |\r\n',
-	);
-	socket.write(line);
+	string += line;
+	string +=
+		'| Tiempo                 | Formas                                   |\r\n';
+	string += line;
 
 	// Iterate through moods and tenses
 	const rows: Array<{ label: string; text: string }> = [];
@@ -62,9 +62,11 @@ export default function writeConjugationTable(socket: Socket, conj: any) {
 
 	// Write rows
 	for (const row of rows) {
-		socket.write(`| ${row.label.padEnd(22)} | ${row.text.padEnd(42)} |\r\n`);
+		string += `| ${row.label.padEnd(22)} | ${row.text.padEnd(42)} |\r\n`;
 	}
 
-	socket.write(line);
-	socket.write('\r\n');
+	string += line;
+	string += '\r\n';
+
+	return string;
 }

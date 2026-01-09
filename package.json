@@ -18,5 +18,8 @@
     "build": "tsc",
     "test": "jest --coverage --detectOpenHandles",
     "start": "node ."
+  },
+  "dependencies": {
+    "@santi100a/dict-server": "^1.0.0"
   }
 }
