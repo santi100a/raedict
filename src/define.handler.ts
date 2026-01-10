@@ -8,10 +8,7 @@ import type { DictResponse } from '@santi100a/dict-server/dist/response.class';
 
 console.info('[INFO] DEFINE module loaded.');
 
-export = async function define(
-	command: DictCommand,
-	response: DictResponse,
-) {
+export = async function define(command: DictCommand, response: DictResponse) {
 	try {
 		const [dictionary, queryWord] = command.parameters;
 
@@ -65,7 +62,12 @@ export = async function define(
 					dictionary: 'dle',
 					definition,
 					dictionaryDescription: 'Diccionario de la Lengua Española',
-					mimeHeaders: {},
+					mimeHeaders: response.optionMimeEnabled
+						? {
+								'Content-type': 'text/plain; charset=utf-8',
+								'Content-transfer-encoding': '8bit',
+							}
+						: {},
 				};
 			}),
 		);
@@ -73,4 +75,4 @@ export = async function define(
 		console.error('[DEFINE handler] ERROR:', err);
 		response.error(420, 'Error interno al obtener las definiciones');
 	}
-}
+};
