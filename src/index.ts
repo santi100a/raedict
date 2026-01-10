@@ -1,14 +1,35 @@
 import DictServer = require('@santi100a/dict-server');
-import formatCategoryString from './lib/libformat';
-import processUsage from './lib/libusage';
-import writeConjugationTable from './lib/libconjugationtable';
-import { defineHandler } from './define.handler';
+import defineHandler = require('./define.handler');
+import matchHandler = require('./match.handler');
+import statusHandler = require('./status.handler');
+import authHandler = require('./auth.handler');
+import quitHandler = require('./quit.handler');
 
 const server = new DictServer();
-const PORT = process.env.PORT ?? 2628;
+const PORT = Number(process.env.PORT ?? 2628);
+const TIMEOUT = 30_000;
+
+server.onConnect(response => {
+	const { welcomeText, capabilities, messageId } = server;
+	response.writeLine(
+		`220 ${welcomeText} <${capabilities.join('.')}> <${messageId}>`,
+	);
+
+	console.info('[INFO] Connected:', response.remoteAddress);
+	response.setTimeout(TIMEOUT);
+	response.on('timeout', () =>
+		response.close(() => {
+			console.info('[INFO] Socket timeout:', response.remoteAddress);
+		}),
+	);
+});
 
 server.onCommand((command, response) => {
-	console.log(`COMMAND from ${response.remoteAddress}: ${command.raw}`);
+	console.info(
+		'[INFO] COMMAND from',
+		`${response.remoteAddress}:`,
+		command.raw,
+	);
 });
 
 server.setDatabases({
@@ -57,106 +78,18 @@ STATUS                           : Verificar el estado del servicio
 HELP                             : Mostrar esta guía de comandos
 QUIT                             : Desconectarse del servidor`,
 );
+
 server.define(defineHandler);
+server.match(matchHandler);
+server.status(statusHandler);
+server.auth(authHandler);
+server.quit(quitHandler);
 
-server.match(async (command, response) => {
-	const [dictionary, strategy, ...rest] = command.parameters;
-
-	if (!dictionary || !strategy || rest.length === 0) {
-		response.error(501);
-		return;
-	}
-
-	if (!['dle', '*', '!'].includes(dictionary.toLowerCase())) {
-		response.error(550);
-		return;
-	}
-
-	const query = rest.join(' ').replace(/(^['"])|(['"]$)/g, '');
-	let strat = strategy.toLowerCase();
-	if (['.', '=', '!', '*'].includes(strat)) strat = 'exact';
-	if (['~'].includes(strat)) strat = 'fuzzy';
-
-	let engine: string;
-
-	if (['exact', 'prefix'].includes(strat)) engine = 'linear';
-	else if (['fuzzy'].includes(strat)) engine = 'hits';
-	else {
-		response.error(551);
-		return;
-	}
-
-	const url = `https://rae-api.com/api/search?q=${encodeURIComponent(query)}&engine=${engine}`;
-
-	let data: ErrorResponse & SearchResponse;
-	try {
-		const res = await fetch(url);
-		if (!res.ok) {
-			response.error(
-				420,
-				`Error del servidor al buscar: ${res.status} ${res.statusText}`,
-			);
-			return;
-		}
-		data = await res.json();
-	} catch (err) {
-		console.error('[ERROR] [Module MATCH] API connection error:', err);
-		response.error(420, `Error de conexión con la API`);
-		return;
-	}
-
-	// The API returns an array of documents with { doc: { id }, hits }
-	const results = Array.isArray(data) ? data : [];
-
-	if (results.length > 0) {
-		response.writeMatches(
-			results.map(result => {
-				return {
-					dictionary: 'dle',
-					word: result.doc?.id,
-				};
-			}),
-		);
-		return;
-	}
-	response.error(552);
-});
-
-server.status(async (_, response) => {
-	try {
-		const startTime = performance.now();
-		const req = await fetch('https://rae-api.com/api/daily');
-		if (!req.ok) {
-			response.error(
-				554,
-				`Error al contactar con la API de la RAE: ${req.status} ${req.statusText}`,
-			);
-			return;
-		}
-		const endTime = performance.now();
-		const responseTime = endTime - startTime;
-
-		const { data } = (await req.json()) as WordOnlyResponse;
-
-		const wotd = data.word ?? '(desconocida)';
-
-		response.status(
-			210, [], `OK - Palabra del día: ${wotd}, tardó ${responseTime.toFixed(2)} ms en llegar\r\n`,
-		);
-		return;
-	} catch (err) {
-		console.error('[ERROR] [Module STATUS] Upstream error:', err);
-		response.error(420, 'Servicio no disponible');
-		return;
-	}
-});
-
-server.command('AUTH', (_, response) => {
-	response.status(230, [], 'Este es un servidor público, todos son bienvenidos :)');
-});
-
-server.quit((_, response) => response.status(221, [], `Fue un gusto atenderte${response.clientText ? ', '.concat(response.clientText) : ''}`).close());
-
-server.listen(Number(PORT), () =>
-	console.log(`Server ready on dict://127.0.0.1:${PORT}/`),
+server.listen(PORT, () =>
+	console.log(`[SUCCESS] Server ready on dict://127.0.0.1:${PORT}/`),
 );
+
+process.on('SIGINT', () => {
+	console.info('[INFO] Please wait - shutting down...');
+	server.shutdown().then(() => console.log('[SUCCESS] raedict done. Thank you.'));
+});

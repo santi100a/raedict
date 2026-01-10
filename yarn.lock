@@ -681,9 +681,9 @@
   integrity sha512-CchVLAw00jNEShFWHA0C6dJNOVpojIR9zgpv4YDlsR1M9jCGom3Ss52Oh4sxdNc1K+nvcADU6rQWOQbT0OIf3w==
 
 "@santi100a/dict-server@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@santi100a/dict-server/-/dict-server-1.0.0.tgz#5b5621edb817ac1d442a7c522a7ce1ff7afa9192"
-  integrity sha512-jNoa5msBe12LR0of/HePFkWPXhgJPKEw/ix85E5wd91kbD+XP1F8TXVNmq4/59mHvTbxYlYYT+FUOHqaiwUMOw==
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@santi100a/dict-server/-/dict-server-1.0.1.tgz#7cb74375cb9769c35b0158c7e0f5ace13db229a4"
+  integrity sha512-NQ9PHNxrntYUYkc4WWw/WmGwlbixxuAFYTjobkBbT+mVRh4GOeBxP/1xOsowcxsUOgjh3e2RAsrR66XDekD1/A==
   dependencies:
     "@santi100a/assertion-lib" "^2.0.4"
 
