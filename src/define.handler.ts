@@ -90,7 +90,10 @@ export = async function define(command: DictCommand, response: DictResponse) {
 					dictionary: 'dle',
 					definition,
 					dictionaryDescription: 'Diccionario de la Lengua Española',
-					mimeHeaders: {},
+					mimeHeaders: response.optionMimeEnabled ? {
+						'Content-type': 'text/plain; charset=utf-8',
+						'Content-transfer-encoding': '8bit'
+					} : {},
 				};
 			}),
 		);
