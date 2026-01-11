@@ -8,6 +8,50 @@ import type { DictResponse } from '@santi100a/dict-server/dist/response.class';
 
 console.info('[INFO] DEFINE module loaded.');
 
+// In-memory cache with TTL (Time To Live)
+interface CacheEntry {
+	data: WordEntryResponse;
+	timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour in milliseconds
+const MAX_CACHE_SIZE = 1000; // Maximum number of entries
+
+// Cleanup function to remove expired entries
+function cleanupCache(): void {
+	const now = Date.now();
+	const entriesToDelete: string[] = [];
+
+	for (const [key, entry] of cache.entries()) {
+		if (now - entry.timestamp > CACHE_TTL) {
+			entriesToDelete.push(key);
+		}
+	}
+
+	for (const key of entriesToDelete) {
+		cache.delete(key);
+	}
+
+	// If still over limit, remove oldest entries
+	if (cache.size > MAX_CACHE_SIZE) {
+		const entries = Array.from(cache.entries())
+			.sort((a, b) => a[1].timestamp - b[1].timestamp);
+		
+		const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE);
+		for (const [key] of toRemove) {
+			cache.delete(key);
+		}
+	}
+}
+
+// Run cleanup every 10 minutes, but allow it to be cleared in tests
+const cleanupInterval = setInterval(cleanupCache, 1000 * 60 * 10);
+// Allow tests to clear the interval
+if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
+	cleanupInterval.unref(); // Don't keep the process alive in tests
+}
+
 export = async function define(command: DictCommand, response: DictResponse) {
 	try {
 		const [dictionary, queryWord] = command.parameters;
@@ -21,21 +65,52 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			return;
 		}
 
-		const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
-		const apiResponse = await fetch(url);
-
+		// Create cache key (normalize to lowercase for case-insensitive caching)
+		const cacheKey = queryWord.toLowerCase();
+		
+		// Check cache first
+		const cachedEntry = cache.get(cacheKey);
+		const now = Date.now();
+		
 		let result: WordEntryResponse;
-		try {
-			result = await apiResponse.json();
-		} catch {
-			response.error(420, 'Error al interpretar la respuesta del servidor');
-			return;
+
+		if (cachedEntry && (now - cachedEntry.timestamp) < CACHE_TTL) {
+			// Cache hit - use cached data
+			console.info(`[INFO] Cache hit for word: ${queryWord}`);
+			result = cachedEntry.data;
+		} else {
+			// Cache miss - fetch from API
+			console.info(`[INFO] Cache miss for word: ${queryWord}`);
+			
+			const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
+			const apiResponse = await fetch(url);
+
+			try {
+				result = await apiResponse.json();
+			} catch {
+				response.error(420, 'Error al interpretar la respuesta del servidor');
+				return;
+			}
+
+			// Check for valid response before caching
+			if (apiResponse.status === 404 || !result?.data?.meanings || result.data.meanings.length === 0) {
+				response.error(552);
+				return;
+			}
+
+			// Store in cache
+			cache.set(cacheKey, {
+				data: result,
+				timestamp: now
+			});
+
+			console.info(`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`);
 		}
 
 		const meanings = result?.data?.meanings ?? [];
 		const headword = result?.data?.word ?? '';
 
-		if (apiResponse.status === 404 || meanings.length === 0) {
+		if (meanings.length === 0) {
 			response.error(552);
 			return;
 		}
@@ -65,7 +140,7 @@ export = async function define(command: DictCommand, response: DictResponse) {
 						definition += processedUsage;
 						definition += ']';
 						definition += ' ';
-					};
+					}
 					
 					definition += description;
 					definition += '\r\n';
