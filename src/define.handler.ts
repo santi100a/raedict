@@ -52,6 +52,16 @@ export = async function define(command: DictCommand, response: DictResponse) {
 						sense.usage,
 					)} ${sense.description}`;
 					definition += '\r\n';
+					if (sense.synonyms) {
+						definition += '\tSinónimos: ';
+						definition += sense.synonyms.map(word => `{${word}}`).join(', ');
+						definition += '\r\n';
+					}
+					if (sense.antonyms) {
+						definition += '\tAntónimos: ';
+						definition += sense.antonyms.map(word => `{${word}}`).join(', ');
+						definition += '\r\n';
+					}
 				}
 				if (meaning.conjugations) {
 					definition += '\r\n';
@@ -62,12 +72,7 @@ export = async function define(command: DictCommand, response: DictResponse) {
 					dictionary: 'dle',
 					definition,
 					dictionaryDescription: 'Diccionario de la Lengua Española',
-					mimeHeaders: response.optionMimeEnabled
-						? {
-								'Content-type': 'text/plain; charset=utf-8',
-								'Content-transfer-encoding': '8bit',
-							}
-						: {},
+					mimeHeaders: {},
 				};
 			}),
 		);
