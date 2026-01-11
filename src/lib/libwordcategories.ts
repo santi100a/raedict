@@ -31,3 +31,32 @@ export function processVerbCategory(verbCategory: string): string {
 
 	return verbCategoryMap.get(verbCategory) ?? '';
 }
+
+export function processGender(gender: string): string {
+	const genderMap = new Map<string, string>([
+		['masculine', 'm.'],
+		['feminine', 'f.'],
+	]);
+
+	return genderMap.get(gender) ?? '';
+}
+
+export function processArticle(article: Article): string {
+	if (!article) return;
+	const genderMap = new Map<Article['gender'], string>([
+		['masculine', 'm.'],
+		['feminine', 'f.'],
+		['masculine_and_feminine', 'm. y f.'],
+		['unknown', 'desc.'],
+	]);
+	const categoryMap = new Map<Article['category'], string>([
+		['definite', 'def.'],
+		['indefinite', 'indef.'],
+	]);
+	const gender = genderMap.get(article.gender);
+	const category = categoryMap.get(article.category);
+
+	if (!gender || !category) return '';
+
+	return `${category} ${gender}`;
+}

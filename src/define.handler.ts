@@ -48,18 +48,36 @@ export = async function define(command: DictCommand, response: DictResponse) {
 					definition += '\r\n\r\n';
 				}
 				for (const sense of meaning.senses) {
-					definition += `${sense.meaning_number}. ${formatCategoryString(sense)} ${processUsage(
-						sense.usage,
-					)} ${sense.description}`;
+					const { usage, meaning_number, description, synonyms, antonyms } =
+						sense;
+					const processedUsage = processUsage(usage);
+					const formattedCategory = formatCategoryString(sense);
+
+					definition += String(meaning_number).concat('. ');
+					if (formattedCategory) {
+						definition += '(';
+						definition += formattedCategory;
+						definition += ')';
+						definition += ' ';
+					}
+					if (processedUsage) {
+						definition += '[';
+						definition += processedUsage;
+						definition += ']';
+						definition += ' ';
+					};
+					
+					definition += description;
 					definition += '\r\n';
-					if (sense.synonyms) {
+					
+					if (synonyms) {
 						definition += '\tSinónimos: ';
-						definition += sense.synonyms.map(word => `{${word}}`).join(', ');
+						definition += synonyms.map(word => `{${word}}`).join(', ');
 						definition += '\r\n';
 					}
-					if (sense.antonyms) {
+					if (antonyms) {
 						definition += '\tAntónimos: ';
-						definition += sense.antonyms.map(word => `{${word}}`).join(', ');
+						definition += antonyms.map(word => `{${word}}`).join(', ');
 						definition += '\r\n';
 					}
 				}
