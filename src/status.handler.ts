@@ -21,7 +21,7 @@ export = async function status(_, response) {
 		response.status(
 			210,
 			[],
-			`OK - Palabra del día: ${wotd}, tardó ${responseTime.toFixed(2)} ms en llegar\r\n`,
+			`OK - Palabra del día: ${wotd} [listo en ${(responseTime / 1_000).toFixed(2)} s]\r\n`,
 		);
 		return;
 	} catch (err) {

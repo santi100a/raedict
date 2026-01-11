@@ -10,8 +10,8 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour in milliseconds
-const MAX_CACHE_SIZE = 1000; // Maximum number of entries
+const CACHE_TTL = 1_000 * 60 * 60; // 1 hour in milliseconds
+const MAX_CACHE_SIZE = 1_000; // Maximum number of entries
 
 // Cleanup function to remove expired entries
 function cleanupCache(): void {
@@ -30,9 +30,10 @@ function cleanupCache(): void {
 
 	// If still over limit, remove oldest entries
 	if (cache.size > MAX_CACHE_SIZE) {
-		const entries = Array.from(cache.entries())
-			.sort((a, b) => a[1].timestamp - b[1].timestamp);
-		
+		const entries = Array.from(cache.entries()).sort(
+			(a, b) => a[1].timestamp - b[1].timestamp
+		);
+
 		const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE);
 		for (const [key] of toRemove) {
 			cache.delete(key);
@@ -41,12 +42,11 @@ function cleanupCache(): void {
 }
 
 // Run cleanup every 10 minutes, but allow it to be cleared in tests
-const cleanupInterval = setInterval(cleanupCache, 1000 * 60 * 10);
+const cleanupInterval = setInterval(cleanupCache, 1_000 * 60 * 10);
 // Allow tests to clear the interval
 if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
 	cleanupInterval.unref(); // Don't keep the process alive in tests
 }
-
 export = async function match(command: DictCommand, response: DictResponse) {
 	const [dictionary, strategy, ...rest] = command.parameters;
 
@@ -76,21 +76,25 @@ export = async function match(command: DictCommand, response: DictResponse) {
 
 	// Create cache key combining query and engine (case-insensitive)
 	const cacheKey = `${query.toLowerCase()}:${engine}`;
-	
+
 	// Check cache first
 	const cachedEntry = cache.get(cacheKey);
-	const now = Date.now();
-	
+	const initialTime = performance.now();
+
 	let data: ErrorResponse & SearchResponse;
 
-	if (cachedEntry && (now - cachedEntry.timestamp) < CACHE_TTL) {
+	if (cachedEntry && initialTime - cachedEntry.timestamp < CACHE_TTL) {
 		// Cache hit - use cached data
-		console.info(`[INFO] Cache hit for match query: ${query} (engine: ${engine})`);
+		console.info(
+			`[INFO] Cache hit for match query: ${query} (engine: ${engine})`
+		);
 		data = cachedEntry.data;
 	} else {
 		// Cache miss - fetch from API
-		console.info(`[INFO] Cache miss for match query: ${query} (engine: ${engine})`);
-		
+		console.info(
+			`[INFO] Cache miss for match query: ${query} (engine: ${engine})`
+		);
+
 		const url = `https://rae-api.com/api/search?q=${encodeURIComponent(query)}&engine=${engine}`;
 
 		try {
@@ -98,7 +102,7 @@ export = async function match(command: DictCommand, response: DictResponse) {
 			if (!res.ok) {
 				response.error(
 					420,
-					`Error del servidor al buscar: ${res.status} ${res.statusText}`,
+					`Error del servidor al buscar: ${res.status} ${res.statusText}`
 				);
 				return;
 			}
@@ -114,9 +118,11 @@ export = async function match(command: DictCommand, response: DictResponse) {
 		if (results.length > 0) {
 			cache.set(cacheKey, {
 				data,
-				timestamp: now
+				timestamp: initialTime
 			});
-			console.info(`[INFO] Cached match query: ${query} (engine: ${engine}, cache size: ${cache.size})`);
+			console.info(
+				`[INFO] Cached match query: ${query} (engine: ${engine}, cache size: ${cache.size})`
+			);
 		}
 	}
 
@@ -128,9 +134,11 @@ export = async function match(command: DictCommand, response: DictResponse) {
 			results.map(result => {
 				return {
 					dictionary: 'dle',
-					word: result.doc?.id,
+					word: result.doc?.id
 				};
 			}),
+			'match(es) found - text follows',
+			`OK [${results.length} resultado(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`
 		);
 		return;
 	}

@@ -91,5 +91,8 @@ server.listen(PORT, () =>
 
 process.on('SIGINT', () => {
 	console.info('[INFO] Please wait - shutting down...');
-	server.shutdown().then(() => console.log('[SUCCESS] raedict done. Thank you.'));
+	server.shutdown().then(() => {
+		console.log('[SUCCESS] raedict done. Thank you.');
+		process.exit(0);
+	});
 });

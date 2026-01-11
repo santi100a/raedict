@@ -15,8 +15,8 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour in milliseconds
-const MAX_CACHE_SIZE = 1000; // Maximum number of entries
+const CACHE_TTL = 1_000 * 60 * 60; // 1 hour in milliseconds
+const MAX_CACHE_SIZE = 1_000; // Maximum number of entries
 
 // Cleanup function to remove expired entries
 function cleanupCache(): void {
@@ -35,9 +35,10 @@ function cleanupCache(): void {
 
 	// If still over limit, remove oldest entries
 	if (cache.size > MAX_CACHE_SIZE) {
-		const entries = Array.from(cache.entries())
-			.sort((a, b) => a[1].timestamp - b[1].timestamp);
-		
+		const entries = Array.from(cache.entries()).sort(
+			(a, b) => a[1].timestamp - b[1].timestamp,
+		);
+
 		const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE);
 		for (const [key] of toRemove) {
 			cache.delete(key);
@@ -46,7 +47,7 @@ function cleanupCache(): void {
 }
 
 // Run cleanup every 10 minutes, but allow it to be cleared in tests
-const cleanupInterval = setInterval(cleanupCache, 1000 * 60 * 10);
+const cleanupInterval = setInterval(cleanupCache, 1_000 * 60 * 10);
 // Allow tests to clear the interval
 if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
 	cleanupInterval.unref(); // Don't keep the process alive in tests
@@ -67,21 +68,22 @@ export = async function define(command: DictCommand, response: DictResponse) {
 
 		// Create cache key (normalize to lowercase for case-insensitive caching)
 		const cacheKey = queryWord.toLowerCase();
-		
+
 		// Check cache first
 		const cachedEntry = cache.get(cacheKey);
 		const now = Date.now();
-		
+
 		let result: WordEntryResponse;
 
-		if (cachedEntry && (now - cachedEntry.timestamp) < CACHE_TTL) {
+		const initialTime = performance.now();
+		if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL) {
 			// Cache hit - use cached data
 			console.info(`[INFO] Cache hit for word: ${queryWord}`);
 			result = cachedEntry.data;
 		} else {
 			// Cache miss - fetch from API
 			console.info(`[INFO] Cache miss for word: ${queryWord}`);
-			
+
 			const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
 			const apiResponse = await fetch(url);
 
@@ -93,7 +95,11 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			}
 
 			// Check for valid response before caching
-			if (apiResponse.status === 404 || !result?.data?.meanings || result.data.meanings.length === 0) {
+			if (
+				apiResponse.status === 404 ||
+				!result?.data?.meanings ||
+				result.data.meanings.length === 0
+			) {
 				response.error(552);
 				return;
 			}
@@ -101,10 +107,12 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			// Store in cache
 			cache.set(cacheKey, {
 				data: result,
-				timestamp: now
+				timestamp: now,
 			});
 
-			console.info(`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`);
+			console.info(
+				`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`,
+			);
 		}
 
 		const meanings = result?.data?.meanings ?? [];
@@ -141,10 +149,10 @@ export = async function define(command: DictCommand, response: DictResponse) {
 						definition += ']';
 						definition += ' ';
 					}
-					
+
 					definition += description;
 					definition += '\r\n';
-					
+
 					if (synonyms) {
 						definition += '\tSinónimos: ';
 						definition += synonyms.map(word => `{${word}}`).join(', ');
@@ -165,12 +173,16 @@ export = async function define(command: DictCommand, response: DictResponse) {
 					dictionary: 'dle',
 					definition,
 					dictionaryDescription: 'Diccionario de la Lengua Española',
-					mimeHeaders: response.optionMimeEnabled ? {
-						'Content-type': 'text/plain; charset=utf-8',
-						'Content-transfer-encoding': '8bit'
-					} : {},
+					mimeHeaders: response.optionMimeEnabled
+						? {
+								'Content-type': 'text/plain; charset=utf-8',
+								'Content-transfer-encoding': '8bit',
+							}
+						: {},
 				};
 			}),
+			'definition(s) retrieved - text follows',
+			`OK [${meanings.length} entrada(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`,
 		);
 	} catch (err) {
 		console.error('[DEFINE handler] ERROR:', err);
