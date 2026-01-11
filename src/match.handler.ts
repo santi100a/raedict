@@ -142,5 +142,5 @@ export = async function match(command: DictCommand, response: DictResponse) {
 		);
 		return;
 	}
-	response.error(552);
+	response.error(552, `No match [${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`);
 };

@@ -85,6 +85,7 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			console.info(`[INFO] Cache miss for word: ${queryWord}`);
 
 			const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
+			const initialTime = performance.now();
 			const apiResponse = await fetch(url);
 
 			try {
@@ -102,11 +103,11 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			) {
 				response.error(
 					552,
-					result.suggestions
-						? `No existe la palabra "${
+					(result.suggestions
+						? `No se encuentra la palabra "${
 								normalizedWord
 							}". Sugerencias: ${result.suggestions.join(', ')}`
-						: 'No match'
+						: 'No match').concat(' ', `[${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`)
 				);
 				return;
 			}
