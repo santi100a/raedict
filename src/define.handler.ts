@@ -36,7 +36,7 @@ function cleanupCache(): void {
 	// If still over limit, remove oldest entries
 	if (cache.size > MAX_CACHE_SIZE) {
 		const entries = Array.from(cache.entries()).sort(
-			(a, b) => a[1].timestamp - b[1].timestamp,
+			(a, b) => a[1].timestamp - b[1].timestamp
 		);
 
 		const toRemove = entries.slice(0, cache.size - MAX_CACHE_SIZE);
@@ -67,13 +67,13 @@ export = async function define(command: DictCommand, response: DictResponse) {
 		}
 
 		// Create cache key (normalize to lowercase for case-insensitive caching)
-		const cacheKey = queryWord.toLowerCase();
+		const normalizedWord = queryWord.toLowerCase();
 
 		// Check cache first
-		const cachedEntry = cache.get(cacheKey);
+		const cachedEntry = cache.get(normalizedWord);
 		const now = Date.now();
 
-		let result: WordEntryResponse;
+		let result: WordEntryResponse & ErrorResponse;
 
 		const initialTime = performance.now();
 		if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL) {
@@ -100,18 +100,25 @@ export = async function define(command: DictCommand, response: DictResponse) {
 				!result?.data?.meanings ||
 				result.data.meanings.length === 0
 			) {
-				response.error(552);
+				response.error(
+					552,
+					result.suggestions
+						? `No existe la palabra "${
+								normalizedWord
+							}". Sugerencias: ${result.suggestions.join(', ')}`
+						: 'No match'
+				);
 				return;
 			}
 
 			// Store in cache
-			cache.set(cacheKey, {
+			cache.set(normalizedWord, {
 				data: result,
-				timestamp: now,
+				timestamp: now
 			});
 
 			console.info(
-				`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`,
+				`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`
 			);
 		}
 
@@ -176,13 +183,13 @@ export = async function define(command: DictCommand, response: DictResponse) {
 					mimeHeaders: response.optionMimeEnabled
 						? {
 								'Content-type': 'text/plain; charset=utf-8',
-								'Content-transfer-encoding': '8bit',
+								'Content-transfer-encoding': '8bit'
 							}
-						: {},
+						: {}
 				};
 			}),
 			'definition(s) retrieved - text follows',
-			`OK [${meanings.length} entrada(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`,
+			`OK [${meanings.length} entrada(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`
 		);
 	} catch (err) {
 		console.error('[DEFINE handler] ERROR:', err);

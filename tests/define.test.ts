@@ -155,7 +155,7 @@ describe('DEFINE module', () => {
 		});
 
 		await defineHandler(makeCommand('DEFINE', ['dle', 'notfound404']), mockResponse);
-		expect(mockResponse.error).toHaveBeenCalledWith(552);
+		expect(mockResponse.error).toHaveBeenCalledWith(552, 'No match');
 		expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 	});
 
@@ -172,7 +172,7 @@ describe('DEFINE module', () => {
 		});
 
 		await defineHandler(makeCommand('DEFINE', ['dle', 'emptymeanings']), mockResponse);
-		expect(mockResponse.error).toHaveBeenCalledWith(552);
+		expect(mockResponse.error).toHaveBeenCalledWith(552, 'No match');
 		expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 	});
 
