@@ -10,36 +10,59 @@ on:
       - README.md
 jobs:
   test:
-    name: Run tests
+    name: Ejecutar las pruebas automáticas
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Descargar repositorio
         uses: actions/checkout@v3
-      - name: Set up Node 22
+      - name: Configurar Node 22
         uses: actions/setup-node@v3
         with:
           node-version: 22
-      - name: Install yarn
+      - name: Instalar yarn
         run: npm i -g yarn
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: yarn --frozen-lockfile
-      - name: Build TypeScript source
+      - name: Compilar el código TypeScript
         run: yarn build
-      - name: Run tests
+      - name: Ejecutar las pruebas automáticas
         run: yarn test
   deploy:
-    name: Deploy app
+    name: Subir a Fly.io
     needs: test
     environment: Fly.io
     runs-on: ubuntu-latest
     concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
-      - name: Checkout repository
+      - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Set up Flyctl
+      - name: Configurar Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
-      - name: Deploy to Fly.io
+      - name: Subir a Fly.io
         run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  docker:
+    name: Subir a Docker
+    needs: test
+    environment: Docker
+    runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+      - name: Entrar en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Compilar y subir la imagen a Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/raedict:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/raedict:${{ github.sha }}
