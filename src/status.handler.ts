@@ -1,4 +1,4 @@
-console.info('[INFO] STATUS module loaded.');
+console.info('\x1b[34m[INFO]\x1b[0m', 'STATUS module loaded.');
 
 export = async function status(_, response) {
 	try {
@@ -7,7 +7,7 @@ export = async function status(_, response) {
 		if (!req.ok) {
 			response.error(
 				554,
-				`Error al contactar con la API de la RAE: ${req.status} ${req.statusText}`,
+				`Error al contactar con la API de la RAE: ${req.status} ${req.statusText}`
 			);
 			return;
 		}
@@ -21,12 +21,17 @@ export = async function status(_, response) {
 		response.status(
 			210,
 			[],
-			`OK - Palabra del día: ${wotd} [listo en ${(responseTime / 1_000).toFixed(2)} s]\r\n`,
+			`OK - Palabra del día: ${wotd} [${responseTime} ms]\r\n`
 		);
 		return;
 	} catch (err) {
-		console.error('[ERROR] [Module STATUS] Upstream error:', err);
+		console.error(
+			'\x1b[31m[ERROR]\x1b[0m',
+			'STATUS module:',
+			'Upstream error:',
+			err
+		);
 		response.error(420, 'Servicio no disponible');
 		return;
 	}
-}
+};

@@ -37,15 +37,27 @@ server.onConnect(response => {
 
 	// Check connection attempt rate limit (anti-flood)
 	if (!connectionManager.checkConnectionRate(ip)) {
-		console.warn('[WARN] Connection rate limit exceeded for', ip);
-		response.error(530, 'Access denied - too many connection attempts').close();
+		// ANSI 33 = yellow
+
+		console.warn(
+			'\x1b[33m[WARN]\x1b[0m',
+			'Connection rate limit exceeded for',
+			ip
+		);
+		response.error(530, 'Demasiados intentos de conectarte').close();
 		return;
 	}
 
 	// Check if server has reached max simultaneous connections
 	if (!connectionManager.canAcceptConnection()) {
-		console.warn('[WARN] Server at max connections, rejecting', ip);
-		response.error(420, 'Too many connections').close();
+		console.warn(
+			'\x1b[33m[WARN]\x1b[0m',
+			'Server at max connections, rejecting',
+			ip
+		);
+		response
+			.error(420, 'Servidor no disponible. Demasiadas conexiones')
+			.close();
 		return;
 	}
 
@@ -53,7 +65,8 @@ server.onConnect(response => {
 	connectionManager.registerConnection(connectionId);
 
 	console.info(
-		'[INFO] Connected:',
+		'\x1b[34m[INFO]\x1b[0m',
+		'Connected:',
 		ip,
 		`(${connectionManager.getActiveConnections()}/${LIMIT_CHILDS} active)`
 	);
@@ -64,14 +77,19 @@ server.onConnect(response => {
 	response.on('timeout', () => {
 		connectionManager.unregisterConnection(connectionId);
 		response.close(() => {
-			console.info('[INFO] Connection time limit reached:', ip);
+			console.info(
+				'\x1b[34m[INFO]\x1b[0m',
+				'Connection time limit reached:',
+				ip
+			);
 		});
 	});
 
 	response.on('close', () => {
 		connectionManager.unregisterConnection(connectionId);
 		console.info(
-			'[INFO] Disconnected:',
+			'\x1b[34m[INFO]\x1b[0m',
+			'Disconnected:',
 			ip,
 			`(${connectionManager.getActiveConnections()}/${LIMIT_CHILDS} active)`
 		);
@@ -91,20 +109,30 @@ server.onCommand((command, response) => {
 	const connectionId = (response as any)._connectionId;
 
 	if (!connectionId) {
-		console.error('[ERROR] No connection ID found for', ip);
+		console.error('\x1b[31m[ERROR]\x1b[0m', 'No connection ID found for', ip);
 		return;
 	}
 
 	// Check if time limit exceeded
 	if (connectionManager.isTimeLimitExceeded(connectionId)) {
-		console.info('[INFO] Time limit exceeded for', ip, '- closing connection');
+		console.info(
+			'\x1b[34m[INFO]\x1b[0m',
+			'Time limit exceeded for',
+			ip,
+			'- closing connection'
+		);
 		response.close();
 		return;
 	}
 
 	// Check if query limit exceeded
 	if (connectionManager.isQueryLimitExceeded(connectionId)) {
-		console.info('[INFO] Query limit exceeded for', ip, '- closing connection');
+		console.info(
+			'\x1b[34m[INFO]\x1b[0m',
+			'Query limit exceeded for',
+			ip,
+			'- closing connection'
+		);
 		response.close();
 		return;
 	}
@@ -117,7 +145,8 @@ server.onCommand((command, response) => {
 
 	const remaining = connectionManager.getRemainingQueries(connectionId);
 	console.info(
-		'[INFO] COMMAND from',
+		'\x1b[34m[INFO]\x1b[0m',
+		'COMMAND from',
 		`${ip}:`,
 		command.raw,
 		`(${remaining} queries remaining)`
@@ -182,14 +211,18 @@ server.client((command, response) => {
 });
 
 server.listen(PORT, () =>
-	console.log(`[SUCCESS] Server ready on dict://127.0.0.1:${PORT}/`)
+	// ANSI 32 = green
+	console.log(
+		'\x1b[32m[SUCCESS]\x1b[0m',
+		`Server ready on dict://127.0.0.1:${PORT}/`
+	)
 );
 
 process.on('SIGINT', () => {
-	console.info('[INFO] Please wait - shutting down...');
+	console.info('\x1b[34m[INFO]\x1b[0m', 'Please wait - shutting down...');
 	connectionManager.shutdown();
 	server.shutdown().then(() => {
-		console.log('[SUCCESS] raedict done. Thank you.');
+		console.log('\x1b[32m[SUCCESS]\x1b[0m', 'raedict done. Thank you.');
 		process.exit(0);
 	});
 });

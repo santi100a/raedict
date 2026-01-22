@@ -1,4 +1,4 @@
-console.info('[INFO] AUTH module loaded.');
+console.info('\x1b[34m[INFO]\x1b[0m', 'AUTH module loaded.');
 export = function auth(_, response) {
 	response.status(
 		230,

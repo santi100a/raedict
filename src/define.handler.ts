@@ -6,7 +6,8 @@ import writeConjugationTable from './lib/libconjugationtable';
 import type { DictCommand } from '@santi100a/dict-server/dist/lib/libtypes';
 import type { DictResponse } from '@santi100a/dict-server/dist/response.class';
 
-console.info('[INFO] DEFINE module loaded.');
+// ANSI 34 = blue
+console.info('\x1b[34m[INFO]\x1b[0m', 'DEFINE module loaded.');
 
 // In-memory cache with TTL (Time To Live)
 interface CacheEntry {
@@ -54,15 +55,16 @@ if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
 }
 
 export = async function define(command: DictCommand, response: DictResponse) {
+	const initialTime = performance.now();
 	try {
 		const [dictionary, queryWord] = command.parameters;
 
 		if (!dictionary || !queryWord) {
-			response.status(501);
+			response.status(501, [], 'Faltan argumentos');
 			return;
 		}
 		if (!['*', '!', 'dle'].includes(dictionary)) {
-			response.status(550);
+			response.status(550, [], 'Solamente existe el diccionario "dle"');
 			return;
 		}
 
@@ -75,17 +77,15 @@ export = async function define(command: DictCommand, response: DictResponse) {
 
 		let result: WordEntryResponse & ErrorResponse;
 
-		const initialTime = performance.now();
 		if (cachedEntry && now - cachedEntry.timestamp < CACHE_TTL) {
 			// Cache hit - use cached data
-			console.info(`[INFO] Cache hit for word: ${queryWord}`);
+			console.info('\x1b[34m[INFO]\x1b[0m', `Cache hit for word: ${queryWord}`);
 			result = cachedEntry.data;
 		} else {
 			// Cache miss - fetch from API
-			console.info(`[INFO] Cache miss for word: ${queryWord}`);
+			console.info('\x1b[34m[INFO]\x1b[0m', `Cache miss for word: ${queryWord}`);
 
 			const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
-			const initialTime = performance.now();
 			const apiResponse = await fetch(url);
 
 			try {
@@ -107,7 +107,7 @@ export = async function define(command: DictCommand, response: DictResponse) {
 						? `No se encuentra la palabra "${
 								normalizedWord
 							}". Sugerencias: ${result.suggestions.join(', ')}`
-						: 'No match').concat(' ', `[${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`)
+						: 'No se encuentra la palabra').concat(' ', `[${(performance.now() - initialTime).toFixed(2)} ms]`)
 				);
 				return;
 			}
@@ -119,7 +119,8 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			});
 
 			console.info(
-				`[INFO] Cached word: ${queryWord} (cache size: ${cache.size})`
+				'\x1b[34m[INFO]\x1b[0m',
+				`Cached word: ${queryWord} (cache size: ${cache.size})`
 			);
 		}
 
@@ -127,17 +128,18 @@ export = async function define(command: DictCommand, response: DictResponse) {
 		const headword = result?.data?.word ?? '';
 
 		if (meanings.length === 0) {
-			response.error(552);
+			response.error(552, `No hay entradas para la palabra "${headword}" [${(performance.now() - initialTime).toFixed(2)} ms]`);
 			return;
 		}
 
-		response.writeDefinitions(
-			meanings.map(meaning => {
+		// convert API info => DICT entries
+		const definitions = meanings.map(meaning => {
 				let definition = '';
 				if (meaning.origin) {
 					definition += `\\${meaning.origin.raw}\\`;
 					definition += '\r\n\r\n';
 				}
+				if (!meaning.senses) return null; // prevents error 420 if upstream includes { senses: null }
 				for (const sense of meaning.senses) {
 					const { usage, meaning_number, description, synonyms, antonyms } =
 						sense;
@@ -188,12 +190,17 @@ export = async function define(command: DictCommand, response: DictResponse) {
 							}
 						: {}
 				};
-			}),
-			'definition(s) retrieved - text follows',
-			`OK [${meanings.length} entrada(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`
+			})
+			.filter(definition => definition !== null); // prevents passing null when { senses: null } happens
+
+		response.writeDefinitions(
+			definitions,
+			'entrada(s) encontrada(s)',
+			`OK [${definitions.length} entrada(s) en ${(performance.now() - initialTime).toFixed(2)} ms]`
 		);
 	} catch (err) {
-		console.error('[DEFINE handler] ERROR:', err);
+		// ANSI 31 = red
+		console.error('\x1b[31m[ERROR]\x1b[0m', 'DEFINE module:', err);
 		response.error(420, 'Error interno al obtener las definiciones');
 	}
 };

@@ -1,7 +1,7 @@
 import type { DictCommand } from '@santi100a/dict-server/dist/lib/libtypes';
 import type { DictResponse } from '@santi100a/dict-server/dist/response.class';
 
-console.info('[INFO] MATCH module loaded.');
+console.info('\x1b[34m[INFO]\x1b[0m', 'MATCH module loaded.');
 
 // In-memory cache with TTL (Time To Live)
 interface CacheEntry {
@@ -51,12 +51,12 @@ export = async function match(command: DictCommand, response: DictResponse) {
 	const [dictionary, strategy, ...rest] = command.parameters;
 
 	if (!dictionary || !strategy || rest.length === 0) {
-		response.error(501);
+		response.error(501, 'Faltan argumentos');
 		return;
 	}
 
 	if (!['dle', '*', '!'].includes(dictionary.toLowerCase())) {
-		response.error(550);
+		response.error(550, 'Solamente existe el diccionario "dle"');
 		return;
 	}
 
@@ -70,7 +70,7 @@ export = async function match(command: DictCommand, response: DictResponse) {
 	if (['exact', 'prefix'].includes(strat)) engine = 'linear';
 	else if (['fuzzy'].includes(strat)) engine = 'hits';
 	else {
-		response.error(551);
+		response.error(551, 'Estrategia incorrecta. Ver "SHOW STRAT"');
 		return;
 	}
 
@@ -86,12 +86,14 @@ export = async function match(command: DictCommand, response: DictResponse) {
 	if (cachedEntry && initialTime - cachedEntry.timestamp < CACHE_TTL) {
 		// Cache hit - use cached data
 		console.info(
-			`[INFO] Cache hit for match query: ${query} (engine: ${engine})`
+			'\x1b[34m[INFO]\x1b[0m',
+			`Cache hit for match query: ${query} (engine: ${engine})`
 		);
 		data = cachedEntry.data;
 	} else {
 		// Cache miss - fetch from API
 		console.info(
+			'\x1b[34m[INFO]\x1b[0m',
 			`[INFO] Cache miss for match query: ${query} (engine: ${engine})`
 		);
 
@@ -108,8 +110,13 @@ export = async function match(command: DictCommand, response: DictResponse) {
 			}
 			data = await res.json();
 		} catch (err) {
-			console.error('[ERROR] [Module MATCH] API connection error:', err);
-			response.error(420, `Error de conexión con la API`);
+			console.error(
+				'\x1b[31m[ERROR]\x1b[0m',
+				'MATCH module:',
+				'API connection error:',
+				err
+			);
+			response.error(420, `Error al conectar con la API`);
 			return;
 		}
 
@@ -121,6 +128,7 @@ export = async function match(command: DictCommand, response: DictResponse) {
 				timestamp: initialTime
 			});
 			console.info(
+				'\x1b[34m[INFO]\x1b[0m',
 				`[INFO] Cached match query: ${query} (engine: ${engine}, cache size: ${cache.size})`
 			);
 		}
@@ -137,10 +145,13 @@ export = async function match(command: DictCommand, response: DictResponse) {
 					word: result.doc?.id
 				};
 			}),
-			'match(es) found - text follows',
-			`OK [${results.length} resultado(s) en ${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`
+			'coincidencia(s) encontrada(s)',
+			`OK [${results.length} resultado(s) en ${(performance.now() - initialTime).toFixed(2)} ms]`
 		);
 		return;
 	}
-	response.error(552, `No match [${((performance.now() - initialTime) / 1_000).toFixed(2)} s]`);
+	response.error(
+		552,
+		`No hay coincidencias [${(performance.now() - initialTime).toFixed(2)} ms]`
+	);
 };
