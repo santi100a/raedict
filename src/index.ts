@@ -185,7 +185,7 @@ server.setServerInfo(
 (C) 2025-presente Santiago Rojas <https://github.com/santi100a>
 Funciona gracias a RAE API <https://rae-api.com>`
 );
-server.setWelcomeText('RAE DICT');
+server.setWelcomeText(`raedict.zapto.org RAE DICT en ${process.platform}, Node.js ${process.version}`);
 server.setHelpText(
 	`DEFINE dle <palabra>             : Obtener definiciones de palabras
 MATCH dle <estrategia> <palabra> : Buscar palabras que coincidan con un patrón
