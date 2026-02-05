@@ -15,6 +15,7 @@ primary_region = 'gru'
 
 [env]
   PORT = "2628"
+  NODE_ENV = "production"
 
 [[services]]
   internal_port = 2628

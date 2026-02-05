@@ -186,7 +186,9 @@ server.setServerInfo(
 Funciona gracias a RAE API <https://rae-api.com>`
 );
 server.setWelcomeText(
-	`raedict.zapto.org RAE DICT en ${process.platform}, Node.js ${process.version}`
+	`raedict.zapto.org RAE DICT en ${process.platform}, Node.js ${process.version}`.concat(
+		process.env.NODE_ENV === 'production' ? '' : ` (DESARROLLO)`
+	)
 );
 server.setHelpText(
 	`DEFINE dle <palabra>             : Obtener definiciones de palabras
