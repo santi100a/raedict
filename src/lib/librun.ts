@@ -1,7 +1,7 @@
 // wrapper to add a command-level timeout around handlers that may await
 export default async function runWithTimeout<T>(
 	fn: () => Promise<T>,
-	timeoutMs: number,
+	timeoutMs: number
 ): Promise<T> {
 	let timer: NodeJS.Timeout | null = null;
 	const timeoutPromise = new Promise<never>((_, rej) => {

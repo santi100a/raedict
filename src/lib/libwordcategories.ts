@@ -16,7 +16,7 @@ export function processCategory(category: string): string {
 		['article', 'art.'],
 		['numeral', 'num.'],
 		['prefix', 'pref.'],
-		['suffix', 'suf.'],
+		['suffix', 'suf.']
 	]);
 
 	return categoryMap.get(category) ?? category ?? '';
@@ -26,7 +26,7 @@ export function processVerbCategory(verbCategory: string): string {
 	const verbCategoryMap = new Map<string, string>([
 		['transitive', 'tr.'],
 		['intransitive', 'intr.'],
-		['pronominal', 'prnl.'],
+		['pronominal', 'prnl.']
 	]);
 
 	return verbCategoryMap.get(verbCategory) ?? '';
@@ -35,7 +35,7 @@ export function processVerbCategory(verbCategory: string): string {
 export function processGender(gender: string): string {
 	const genderMap = new Map<string, string>([
 		['masculine', 'm.'],
-		['feminine', 'f.'],
+		['feminine', 'f.']
 	]);
 
 	return genderMap.get(gender) ?? '';
@@ -47,11 +47,11 @@ export function processArticle(article: Article): string {
 		['masculine', 'm.'],
 		['feminine', 'f.'],
 		['masculine_and_feminine', 'm. y f.'],
-		['unknown', 'desc.'],
+		['unknown', 'desc.']
 	]);
 	const categoryMap = new Map<Article['category'], string>([
 		['definite', 'def.'],
-		['indefinite', 'indef.'],
+		['indefinite', 'indef.']
 	]);
 	const gender = genderMap.get(article.gender);
 	const category = categoryMap.get(article.category);

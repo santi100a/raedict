@@ -9,7 +9,7 @@ import processUsage from './libusage';
 export default function writeSenseBlock(socket: Socket, sense: any): void {
 	const categoryString = formatCategoryString(sense);
 	socket.write(
-		` ${sense.meaning_number}. ${categoryString} ${processUsage(sense.usage)} ${sense.description}`,
+		` ${sense.meaning_number}. ${categoryString} ${processUsage(sense.usage)} ${sense.description}`
 	);
 
 	socket.write('\r\n');

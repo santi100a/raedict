@@ -1,4 +1,9 @@
-import { processCategory, processGender, processVerbCategory, processArticle } from './libwordcategories';
+import {
+	processCategory,
+	processGender,
+	processVerbCategory,
+	processArticle
+} from './libwordcategories';
 export default function formatCategoryString(sense: Definition) {
 	if (!sense) return '';
 	const parts: string[] = [];
@@ -13,5 +18,5 @@ export default function formatCategoryString(sense: Definition) {
 	if (article) parts.push(article);
 	if (verbCategory) parts.push(verbCategory);
 	if (gender) parts.push(gender);
-	return parts.length ? parts.join(' '): '';
+	return parts.length ? parts.join(' ') : '';
 }

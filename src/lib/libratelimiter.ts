@@ -11,7 +11,7 @@ export class RateLimiter {
 	constructor(
 		interval: number,
 		private readonly rateLimitWindow: number,
-        private readonly maxRequestsPerWindow: number
+		private readonly maxRequestsPerWindow: number
 	) {
 		// Periodically clean up old entries
 		this.cleanupTimer = setInterval(() => {

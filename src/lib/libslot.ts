@@ -1,7 +1,7 @@
 export default async function acquireGlobalApiSlot(
 	globalApiInFlight: number,
 	globalApiQueue: (() => void)[],
-	GLOBAL_API_CONCURRENCY: number,
+	GLOBAL_API_CONCURRENCY: number
 ): Promise<() => void> {
 	// returns a resolver that releases the slot when called
 	if (globalApiInFlight < GLOBAL_API_CONCURRENCY) {

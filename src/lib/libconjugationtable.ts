@@ -26,7 +26,7 @@ export default function writeConjugationTable(conj: any) {
 
 		rows.push({
 			label,
-			text: joined.substring(0, 42),
+			text: joined.substring(0, 42)
 		});
 	}
 
@@ -40,7 +40,7 @@ export default function writeConjugationTable(conj: any) {
 		for (const [tense, forms] of Object.entries(conj.indicative)) {
 			addForm(
 				'Indicativo: ' + processConjugation(tense),
-				forms as Record<string, string>,
+				forms as Record<string, string>
 			);
 		}
 	}
@@ -50,7 +50,7 @@ export default function writeConjugationTable(conj: any) {
 		for (const [tense, forms] of Object.entries(conj.subjunctive)) {
 			addForm(
 				'Subjuntivo: ' + processConjugation(tense),
-				forms as Record<string, string>,
+				forms as Record<string, string>
 			);
 		}
 	}

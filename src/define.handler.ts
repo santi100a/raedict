@@ -83,7 +83,10 @@ export = async function define(command: DictCommand, response: DictResponse) {
 			result = cachedEntry.data;
 		} else {
 			// Cache miss - fetch from API
-			console.info('\x1b[34m[INFO]\x1b[0m', `Cache miss for word: ${queryWord}`);
+			console.info(
+				'\x1b[34m[INFO]\x1b[0m',
+				`Cache miss for word: ${queryWord}`
+			);
 
 			const url = `https://rae-api.com/api/words/${encodeURIComponent(queryWord)}`;
 			const apiResponse = await fetch(url);
@@ -107,7 +110,8 @@ export = async function define(command: DictCommand, response: DictResponse) {
 						? `No se encuentra la palabra "${
 								normalizedWord
 							}". Sugerencias: ${result.suggestions.join(', ')}`
-						: 'No se encuentra la palabra').concat(' ', `[${(performance.now() - initialTime).toFixed(2)} ms]`)
+						: 'No se encuentra la palabra'
+					).concat(' ', `[${(performance.now() - initialTime).toFixed(2)} ms]`)
 				);
 				return;
 			}
@@ -128,12 +132,16 @@ export = async function define(command: DictCommand, response: DictResponse) {
 		const headword = result?.data?.word ?? '';
 
 		if (meanings.length === 0) {
-			response.error(552, `No hay entradas para la palabra "${headword}" [${(performance.now() - initialTime).toFixed(2)} ms]`);
+			response.error(
+				552,
+				`No hay entradas para la palabra "${headword}" [${(performance.now() - initialTime).toFixed(2)} ms]`
+			);
 			return;
 		}
 
 		// convert API info => DICT entries
-		const definitions = meanings.map(meaning => {
+		const definitions = meanings
+			.map(meaning => {
 				let definition = '';
 				if (meaning.origin) {
 					definition += `\\${meaning.origin.raw}\\`;

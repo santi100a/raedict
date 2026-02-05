@@ -40,7 +40,7 @@ export function processConjugation(conjugation: string): string {
 			['plural_first_person', '1.ª persona del plural'],
 			['plural_second_person', '2.ª persona del plural'],
 			['plural_formal_second_person', '2.ª persona formal del plural'],
-			['plural_third_person', '3.ª persona del plural'],
+			['plural_third_person', '3.ª persona del plural']
 		]);
 	}
 

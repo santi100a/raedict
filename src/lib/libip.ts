@@ -11,7 +11,7 @@ export function recordCommandFromIp(
 	socket: Socket,
 	ipCommandWindows: Map<string, number[]>,
 	RATE_WINDOW_MS: number,
-	MAX_COMMANDS_PER_WINDOW: number,
+	MAX_COMMANDS_PER_WINDOW: number
 ): boolean {
 	const ip = getIpKey(socket);
 	const now = Date.now();
@@ -30,7 +30,7 @@ export function recordCommandFromIp(
 export function incrementIpConn(
 	socket: Socket,
 	ipConnCounts: Map<string, number>,
-	PER_IP_MAX_CONNECTIONS: number,
+	PER_IP_MAX_CONNECTIONS: number
 ): boolean {
 	const ip = getIpKey(socket);
 	const current = ipConnCounts.get(ip) ?? 0;
@@ -41,7 +41,7 @@ export function incrementIpConn(
 
 export function decrementIpConn(
 	socket: Socket,
-	ipConnCounts: Map<string, number>,
+	ipConnCounts: Map<string, number>
 ) {
 	const ip = getIpKey(socket);
 	const current = ipConnCounts.get(ip) ?? 0;
